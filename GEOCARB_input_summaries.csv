@@ -1,0 +1,73 @@
+parameter,type,resample,distribution_type,mean,two_sigma,lower_limit,upper_limit,units,source,notes
+Sr,time array,TRUE,gaussian,,,#NAME?,inf,(87Sr/86Sr-0.7)*10^4,"Berner (1994, 2004)",Strontium isotopic composition of shallow-marine carbonate
+d13C,time array,TRUE,gaussian,,,#NAME?,inf,per mil,"Berner (2004, 2006a, 2009)","Stable carbon isotopic composition of shallow-marine carbonate; called ""DLCOC"" in BASIC code"
+d34S,time array,TRUE,gaussian,,,#NAME?,inf,per mil,Wu et al (2010),"Stable sulfur isotopic composition of shallow-marine carbonate; called ""DLSOC"" in BASIC code"
+fR,time array,TRUE,gaussian,,,0,inf,dimensionless,Berner (2004),Effect of relief on chemical weathering at time (t) relative to the present-day
+fL,time array,TRUE,gaussian,,,0,inf,dimensionless,Berner (2004); Bluth and Kump (1991),Land area covered by carbonates at time (t) relative to the present-day
+fA_Godderis,time array,TRUE,gaussian,,,0,inf,dimensionless,Berner (2004); Otto-Bleisner (1995); Godderis et al (2012),Land area at time (t) relative to the present-day
+fA,time array,TRUE,gaussian,,,0,inf,dimensionless,Berner (2004); Otto-Bleisner (1995); Godderis et al (2012),Land area at time (t) relative to the present-day
+fD_Godderis,time array,TRUE,gaussian,,,0,inf,dimensionless,Berner (2004); Otto-Bleisner (1995); Godderis et al (2012),Global river runoff at time (t) relative to the present-day in the absence of changes in solar luminosity and CO2
+fD,time array,TRUE,gaussian,,,0,inf,dimensionless,Berner (2004); Otto-Bleisner (1995); Godderis et al (2012),Global river runoff at time (t) relative to the present-day in the absence of changes in solar luminosity and CO2
+fAw_fA_Godderis,time array,TRUE,gaussian,,,0,1,dimensionless,Godderis et al (2012),Fraction of land area undergoing chemical weathering
+fAw_fA,time array,TRUE,gaussian,,,0,1,dimensionless,Godderis et al (2012),Fraction of land area undergoing chemical weathering
+RT,time array,TRUE,gaussian,,,0,inf,1/K,Godderis et al (2012),"Coefficient of continental runoff versus temperature change, where fD=1+RT*(T-T0)"
+GEOG_Godderis,time array,TRUE,gaussian,,,#NAME?,inf,K,Berner (2004); Otto-Bleisner (1995); Godderis et al (2012),Change in land mean surface temperature that is undergoing chemical weathering  at time (t) relative to the present-day in the absence of changes in solar luminosity and CO2 (see p. 35 in Berner 2004)
+GEOG,time array,TRUE,gaussian,,,#NAME?,inf,K,Berner (2004); Otto-Bleisner (1995); Godderis et al (2012),Change in land mean surface temperature that is undergoing chemical weathering  at time (t) relative to the present-day in the absence of changes in solar luminosity and CO2 (see p. 35 in Berner 2004)
+fSR,time array,TRUE,gaussian,,,0,inf,dimensionless,Berner (2004),Seafloor creation rate at time (t) relative to the present-day
+fC,time array,TRUE,gaussian,,,0,inf,dimensionless,Berner (2004),"Effect of carbonate content of subducting oceanic crust on CO2 degassing rate at time (t) relative to the present-day; 0.75 for >150 Ma, then ramps up linearly to 1 at present-day"
+ACT,constant,TRUE,gaussian,0.09,0.045,0,inf,1/K,Berner (2004),"Activation energy for dissolution of Ca- and Mg-silicates on land. 0.03 is equivalent to 20 kJ/mol, 0.08 to 55 kJ/mol, and 0.13 to 90 kJ/mol (ACT = DE/RTTo; see p. 28 in Berner 2004)."
+ACTcarb,constant,TRUE,gaussian,0.087,0.0435,0,inf,1/K,Berner (2004),Activation energy for dissolution of carbonates on land
+VNV,constant,TRUE,gaussian,5,2.5,0,inf,dimensionless,"Berner (2006b, 2008)",Rate of chemical weathering in volcanic silicate rocks relative to non-volcanic silicate rocks
+NV,constant,TRUE,gaussian,0.0075,0.00375,0,inf,dimensionless,Berner (2008),Coefficient relating physical erosion to the mean 87Sr/86Sr of non-volcanic silicate rocks
+exp_NV,constant,TRUE,gaussian,0.67,0.335,0,inf,dimensionless,Berner (2008),Exponent relating physical erosion to the mean 87Sr/86Sr of non-volcanic silicate rocks
+LIFE,constant,TRUE,gaussian,0.25,0.125,0,inf,dimensionless,Berner (2004),Rate of chemical weathering in a minimally-vegetated world relative to present-day (angiosperm-dominated world)
+GYM,constant,TRUE,gaussian,0.875,0.415625,0,inf,dimensionless,Berner & Kothavala (2001); Andrews at al. (2008),Rate of chemical weathering by gymnosperms relative to angiosperms
+FERT,constant,TRUE,gaussian,0.4,0.2,0,1,dimensionless,Berner & Kothavala (2001),Exponent reflecting the fraction of vegetation whose growth is stimulated by elevated CO2; FERT is related to enhanced chemical weathering by the Michaelis-Menton expression [2RCO2/(1+RCO2)]^FERT
+exp_fnBb,constant,TRUE,gaussian,0.5,0.125,0,inf,dimensionless,"Berner (1994, 2004)",Exponent used to describe the effect of climate on silicate or carbonate weathering in the absence of vascular plants at time (t) relative to the present-day
+deltaT2X,constant,TRUE,lognormal,3,2.5,1.5,inf,K per CO2 doubling,Park & Royer (2011); Rohling et al (2012),"Climate sensitivity; [compare this to G (""GCM"") factor, where deltaT2X = G * ln(2)]"
+GLAC,constant,TRUE,gaussian,2,1,1,inf,dimensionless,Park & Royer (2011); Rohling et al (2012),Factor by which deltaT2X changes during times with large continental icesheets
+J,constant,TRUE,gaussian,4,2,0,inf,per mil,Berner (2006a),"Coefficient used to calculate CAPd13C (called ""alphac"" in BASIC code), the stable carbon isotopic fractionation between shallow-marine carbonate and shallow-marine organic matter; CAPd13C = 27+J*(oxygen/38-1)"
+n,constant,TRUE,gaussian,1,0.5,0,inf,dimensionless,Berner (2006a),"Exponent used to calculate CAPd34S (called ""alphas"" in BASIC code), the stable sulfur isotopic fractionation between shallow-marine CaSO4 sulfur and pyrite sulfur; CAPd34S = 35((oxygen/38)^n)"
+Ws,constant,TRUE,gaussian,7.4,3.7,#NAME?,inf,K per 570 Myrs,Berner (2004),Effect on temperature from the linear increase in solar luminosity over time
+exp_fD,constant,TRUE,gaussian,0.65,0.325,0,inf,dimensionless,"Berner (1994, 2004)",Exponent that scales the dilution of dissolved HCO3- with runoff (fD)
+Fwpa_0,constant,TRUE,gaussian,0.25,0.125,0,inf,10^18 mol/m.y.,,Sulfate flux from oxidative weathering of old pyrite at present-day
+Fwsa_0,constant,TRUE,gaussian,0.5,0.25,0,inf,10^18 mol/m.y.,,Sulfate flux from weathering of CaSO4 sulfur at present-day
+Fwga_0,constant,TRUE,gaussian,0.5,0.25,0,inf,10^18 mol/m.y.,,Carbon flux from weathering of old sedimentary organic matter at present-day
+Fwca_0,constant,TRUE,gaussian,2,1,0,inf,10^18 mol/m.y.,,Carbon flux from weathering of old Ca and Mg carbonates at present-day
+Fmg_0,constant,TRUE,gaussian,1.25,0.625,0,inf,10^18 mol/m.y.,Berner (2004),"Carbon degassing flux from volcanism, metamorphism, and diagenesis of organic matter at present-day"
+Fmc_0,constant,TRUE,gaussian,6.67,1.50075,0,inf,10^18 mol/m.y.,Berner (2004),"Carbon degassing flux from volcanism, metamorphism, and diagenesis of carbonates at present-day"
+Fmp_0,constant,TRUE,gaussian,0.25,0.125,0,inf,10^18 mol/m.y.,,"Sulfur degassing flux from volcanism, metamorphism, and diagenesis of pyrite at present-day"
+Fms_0,constant,TRUE,gaussian,0.5,0.25,0,inf,10^18 mol/m.y.,,"Sulfur degassing flux from volcanism, metamorphism, and diagenesis of CaSO4 sulfur at present-day"
+Fwsi_0,constant,TRUE,gaussian,6.67,0.83375,0,inf,10^18 mol/m.y.,Berner (1991),Weathering flux for all Ca and Mg silicates at present-day
+Xvolc_0,constant,TRUE,gaussian,0.35,0.07875,0,1,dimensionless,"Berner (2006b, 2008)",Fraction of total Ca and Mg silicate weathering derived from volcanic rocks at present-day
+CAPd13C_0,constant,TRUE,gaussian,27,1.89,0,inf,per mil,Berner (2006a),Stable carbon isotopic fractionation between shallow-marine carbonate and shallow-marine organic matter at present-day
+CAPd34S_0,constant,TRUE,gaussian,35,4.7,0,inf,per mil,Berner (2006a),Stable sulfur isotopic fractionation between shallow-marine CaSO4 sulfur and pyrite sulfur at present-day
+oxygen_570,constant,TRUE,gaussian,25,12.5,7.5,143,10^18 mol,Berner (2006a),Mass of atmospheric O2 (7.5 and 143 correspond to 5% and 50% O2) at 570 Myrs ago
+Gy_570,constant,TRUE,gaussian,250,62.5,0,inf,10^18 mol,Berner (2006a),Mass of young crustal organic carbon at 570 Myrs ago (value in Berner 2006a is a typo)
+Cy_570,constant,TRUE,gaussian,1000,475,0,inf,10^18 mol,Berner (2006a),Mass of young crustal carbonate carbon at 570 Myrs ago (value in Berner 2006a is a typo)
+Ca_570,constant,TRUE,gaussian,4000,1300,0,inf,10^18 mol,Berner (2006a),Mass of old crustal carbonate carbon at 570 Myrs ago (value in Berner 2006a is a typo)
+Ssy_570,constant,TRUE,gaussian,150,56.25,0,inf,10^18 mol,Berner (2006a),Mass of young CaSO4 sulfur at 570 Myrs ago
+Spy_570,constant,TRUE,gaussian,20,10,0,inf,10^18 mol,Berner (2006a),Mass of young pyrite sulfur at 570 Myrs ago
+dlsy_570,constant,TRUE,gaussian,35,4.7,#NAME?,inf,per mil,Berner (2006a),d34S of young CaSO4 sulfur at 570 Myrs ago
+dlcy_570,constant,TRUE,gaussian,3,2.1,#NAME?,inf,per mil,Berner (2006a),d13C of young carbonate carbon at 570 Myrs ago
+dlpy_570,constant,TRUE,gaussian,-10,4.7,#NAME?,inf,per mil,Berner (2006a),d34S of young pyrite sulfur at 570 Myrs ago
+dlpa_570,constant,TRUE,gaussian,-10,4.7,#NAME?,inf,per mil,Berner (2006a),d34S of old pyrite sulfur at 570 Myrs ago
+dlgy_570,constant,TRUE,gaussian,-23.5,2.1,#NAME?,inf,per mil,Berner (2006a),d13C of young organic matter at 570 Myrs ago
+dlga_570,constant,TRUE,gaussian,-23.5,2.1,#NAME?,inf,per mil,Berner (2006a),d13C of old organic matter at 570 Myrs ago
+Rcy_570,constant,TRUE,gaussian,0.7095,0.0021,#NAME?,inf,dimensionless,,87Sr/86Sr of young carbonates undergoing weathering at 570 Myrs ago
+Rca_570,constant,TRUE,gaussian,0.709,0.0021,#NAME?,inf,dimensionless,,87Sr/86Sr of old carbonates undergoing weathering at 570 Myrs ago
+Rv_570,constant,TRUE,gaussian,0.704,0.001365,#NAME?,inf,dimensionless,Berner (2008),87Sr/86Sr of sub-aerial and submarine volcanic rocks at 570 Myrs ago
+Rg_570,constant,TRUE,gaussian,0.722,0.0021,#NAME?,inf,dimensionless,Berner (2008),87Sr/86Sr of non-volcanic silicates at 570 Myrs ago
+Fob,constant,TRUE,gaussian,4,2,0,inf,10^18 mol/m.y.,Berner (2008),Ca and Mg flux between basalt and seawater
+COC,constant,TRUE,gaussian,2,1,0,inf,10^18 mol,,Mass of carbon in ocean
+Ga,constant,TRUE,gaussian,1000,75,0,inf,10^18 mol,Berner (2006a),Mass of old crustal organic carbon (value in Berner 2006a is a typo)
+Ssa,constant,TRUE,gaussian,150,75,0,inf,10^18 mol,Berner (2006a),Mass of old CaSO4 sulfur
+Spa,constant,TRUE,gaussian,280,140,0,inf,10^18 mol,Berner (2006a),Mass of old pyrite sulfur
+ST,constant,TRUE,gaussian,600,300,0,inf,10^18 mol,,"Mass of sulfur in oceans + ""interacting rocks"" (i.e., sulfur in rocks undergoing weathering, burial, etc.)"
+dlst,constant,TRUE,gaussian,4,3.055,#NAME?,inf,per mil,,d34S of ST
+CT,constant,TRUE,gaussian,6252,468.9,0,inf,10^18 mol,,"Mass of carbon in oceans + ""interacting rocks"" (i.e., carbon in rocks undergoing weathering, burial, etc.)"
+dlct,constant,TRUE,gaussian,-3.5,0.252,#NAME?,inf,per mil,,d13C of CT
+kwpy,constant,TRUE,gaussian,0.01,0.005,0,inf,per Myrs,Berner (2006a),Rate constant expressing mass dependence for young pyrite sulfur
+kwsy,constant,TRUE,gaussian,0.01,0.005,0,inf,per Myrs,Berner (2006a),Rate constant expressing mass dependence for young CaSO4 sulfur
+kwgy,constant,TRUE,gaussian,0.018,0.009,0,inf,per Myrs,Berner (2006a),Rate constant expressing mass dependence for young organic matter weathering
+kwcy,constant,TRUE,gaussian,0.018,0.009,0,inf,per Myrs,Berner (2006a),Rate constant expressing mass dependence for young carbonate weathering
