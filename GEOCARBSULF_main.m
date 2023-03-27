@@ -1,6 +1,6 @@
 %% GEOCARBSULF w/Monte Carlo Resample Option 
 %   Based upon the R script written by Dana Royer for the publication Royer 
-% et al (2014). Please see the ROYER_README.txt file in the same directory
+% et al (2014). Please see the README_ROYER.txt file in the same directory
 % as this script for details on their work and the R code. 
 %
 %   This script is a translation of the R code to Matlab with a
@@ -69,7 +69,7 @@ clear
 
 % ******************   MONTE CARLO ANALYSIS PARAMETERS   ******************
 % number of resamples; if you wish to bypass resampling, set to 1
-resampleN = 100;  
+resampleN = 10000;  
 
 % list of percentiles (of any length) used to evaluate a resampled data set
 % the median (0.5) is outputted by default 
@@ -112,7 +112,7 @@ tstart = 570;
 % 
 
 % how often to give a text update to the screen about progress
-screen_update_steps = 20; 
+screen_update_steps = resampleN./10; 
 
 
 
@@ -479,12 +479,13 @@ end  % resample loop
 % Outputs here include the mean and percentiles for O2 and CO2 for each age
 % plus all of the resampled values for the different parameters so that the
 % values used can be tracked. 
-%GEOCARBSULF_out2csvfiles.m 
+GEOCARBSULF_out2csvfiles; 
 
 % If desired, create a couple of plots to show the data
 %GEOCARBSULF_summaryplots.m 
 
-
+%% END OF CODE
+disp('GEOCARBSULF Run Complete!')
 
 
 
