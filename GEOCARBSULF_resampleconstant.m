@@ -42,7 +42,7 @@ xsd = inputs(row,'two_sigma');
 % but it is simply repeating the values with each time step. This wastes a
 % lot of memory so I have reduced it to just size = 1 X resampleN.
 if (resampleN == 1 || strcmp(resampleYorN,'FALSE') )
-    const_resamp = x{1}*ones(1,resampleN);
+    const_resamp = x.mean*ones(1,resampleN);
 end
 
 % Resample using a Normal or Log Normal Distribution

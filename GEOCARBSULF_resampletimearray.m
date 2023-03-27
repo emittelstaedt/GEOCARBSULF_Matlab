@@ -36,7 +36,7 @@ upper_lim = inputs{row,'upper_limit'};
 % array in question (a full matrix is generated but with resampleN mean 
 % values at each time-step)
 if (resampleN == 1 || strcmp(resampleYorN,'FALSE') )
-    array_resamp = x{:}*ones(1,resampleN);
+    array_resamp = x.(name)*ones(1,resampleN);
 end
 
 % Resample using a Normal Distribution

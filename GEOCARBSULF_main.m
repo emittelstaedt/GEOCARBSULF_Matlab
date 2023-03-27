@@ -87,7 +87,7 @@ input_distribution = 'FALSE';
 % BEWARE: long run times (68X longer than a single resampled run)
 loop_parameters = 'FALSE'; 
 
-% maximum number of times the convergence equation for CO2 will iterate 
+% maximum number of times the convergence equation for CO2_570 will iterate 
 % before signaling a failed run; in a test with reasonably-well-constrained 
 % input parameters (similar to simulations presented in Royer et al, 2014), 
 % the number of iterations never exceeded 7; this variable is here mostly 
@@ -105,6 +105,16 @@ oxygen_0 = 38;
 % Time step size (millions of years, Myrs) 
 Dt = 10; 
 
+% start time (Myrs)
+tstart = 570;
+
+% *****************   SCREEN OUTPUT + PLOTTING CHOICES   ******************
+% 
+
+% how often to give a text update to the screen about progress
+screen_update_steps = 20; 
+
+
 
 %% Read Inputs and Prepare Output Files
 
@@ -112,7 +122,10 @@ Dt = 10;
 GEOCARBSULF_loadinputfiles;
 
 
-%% Setup Arrays for Calculations
+
+
+
+%% Setup Arrays for Calculations and Data Tracking
 
 % *********** Resample Arrays and Constants for MC error Analysis *********
 % Note: if resampleN ==1 no resampling will be done
@@ -124,12 +137,20 @@ GEOCARBSULF_performresampling;
 O2_resamples = zeros(nsteps, resampleN);
 CO2_resamples = zeros(nsteps,resampleN);
 
+% keep track of times each run performed
+age = zeros(nsteps,1);
+
+% track failed runs
+nfail = 0; 
+
 
 %% GEOCARBSULF CALCULATIONS (mass balance and chemical reactions)
 
-% Two loops here: 1) over resamples (i.e., number of model runs) and 2)
+% Three loops here: 1) if loop_variable set to TRUE, then loop over each 
+% individual variable and resample them one at a time. This takes much 
+% longer than the group resample. over resamples (i.e., number of model runs) and 2)
 % over tsteps for each run.  Will see if I can vectorize one or the other
-% (or both??).  
+% (or both??).
 
 % loop over number of resamples
 for irs = 1:resampleN
@@ -137,14 +158,20 @@ for irs = 1:resampleN
     % initialize simulation starting values (ROYER - 570 Myr)
     GEOCARBSULF_setinitialcondition;
 
+    % set flag for failed run to false
+    % Moved from Royer et al., 2014 R code.  In their version, this flag
+    % was inside the time loop.  However, they tracked failed runs by
+    % setting things to NaN, but I do both that and count failed runs
+    % throughout execution so I need it to remain once set for each run. 
+    failed_run = 'FALSE';
+
     % loop over time steps
     for tt = 1:nsteps
 
-        % set flag for failed run to false
-        faild_run = 'FALSE';
-
         % get current time
         t = time_arrays(tt,"age").age;
+        % store time
+        age(tt) = t;
 
         % set factors influenced by glacial vs. non-glacial state ("GCM")
         % glacial periods 260 - 330 Myrs ago and 35 - 0 Myrs ago;
@@ -160,26 +187,28 @@ for irs = 1:resampleN
         % **********  calculate factors related to vegetation type  *******
 
         % vegetation = domination by non-vascular plants
+        % did not change 570 here to tstart since parameters are specific
+        % to actual times in Earth history
         if (t<=570 && t>380)
             % effect of plants on weathering rate at time (t) to the present-day
             fE = LIFE(irs);
 
             %effect of CO2 on plant-assisted weathering for carbonates at
             % time (t) to the present-day
-            fBB = (1+ACTcarb(irs).*GCM.*log(RCO2)-ACTcarb(irs).*Ws(irs).*(t/570)+...
+            fBB = (1+ACTcarb(irs).*GCM.*log(RCO2)-ACTcarb(irs).*Ws(irs).*(t/tstart)+...
                 ACTcarb(irs).*GEOG(tt,irs)).*RCO2.^exp_fnBb(irs);
 
         elseif (t<=380 && t>350)
             %vegetation = ramp-up to gymnosperm domination
             fE = (GYM(irs)-LIFE(irs))*((380-t)/30)+LIFE(irs);
             fBB = ((380-t)/30).*((1 + ACTcarb(irs).*GCM.*log(RCO2)- ...
-                ACTcarb(irs).*Ws(irs).*(t/570)+...
+                ACTcarb(irs).*Ws(irs).*(t/tstart)+...
                 ACTcarb(irs).*GEOG(tt,irs)).*(2*RCO2./(1+RCO2)).^FERT(irs))+...
                 ((t-350)/30).*(1 + ACTcarb(irs).*GCM.*log(RCO2)-...
-                ACTcarb(irs).*Ws(irs).*(t/570)+...
+                ACTcarb(irs).*Ws(irs).*(t/tstart)+...
                 ACTcarb(irs).*GEOG(tt,irs)).*RCO2.^exp_fnBb(irs);
         elseif (t<=350)
-            fBB = (1+ACTcarb(irs)*GCM*log(RCO2)-ACTcarb(irs)*Ws(irs)*(t/570)+...
+            fBB = (1+ACTcarb(irs)*GCM*log(RCO2)-ACTcarb(irs)*Ws(irs)*(t/tstart)+...
                 ACTcarb(irs)*GEOG(tt,irs))*(2*RCO2/(1+RCO2))^FERT(irs);
         elseif (t<=350 && t>130)
             %vegetation = gymnosperm domination
@@ -193,8 +222,9 @@ for irs = 1:resampleN
         end
 
         % ***************  CALCULATE SOURCE FLUXES ************************
-        %(weathering and degassing); see pp. 5660-5661 in Berner (2006a) for
-        % a discussion of the "Fwp", "Fws", and "Fwg" fluxes
+        %                 (weathering and degassing)
+        % see pp. 5660-5661 in Berner (2006a) for discussion of "Fwp",
+        % "Fws", and "Fwg" fluxes
 
         %weathering flux of young pyrite
         Fwpy = fA(tt,irs)*fR(tt,irs)*kwpy(irs)*Spy;
@@ -237,20 +267,222 @@ for irs = 1:resampleN
         Fyog = Fwga+Fmg;  %degassing + weathering flux of organic carbon
         Fyoc = Fwca+Fmc;  %degassing + weathering flux of carbonate carbon
 
+
         % *****************  CALCULATE SINK FLUXES ************************
+        %                          (burial)
+
+        %isotopic fractionation between sulfate sulfur and pyrite sulfur (see Berner 2006a)
+        CAPd34S = CAPd34S_0(irs).*((oxygen./oxygen_0).^n(irs));
+
+        %isotopic fractionation between carbonate and organic matter (see Berner 2006a)
+        CAPd13C = CAPd13C_0(irs)+J(irs).*(oxygen./oxygen_0-1);
+
+        %burial flux of pyrite
+        Fbp = (1/CAPd34S)*((d34S(tt,irs)-dlsy)*Fwsy+(d34S(tt,irs)-dlsa)*Fwsa +...
+            (d34S(tt,irs)-dlpy).*Fwpy+(d34S(tt,irs)-dlpa).*Fwpa +...
+            (d34S(tt,irs)-dlsa).*Fms +(d34S(tt,irs)-dlpa).*Fmp);
+
+        %burial flux of organic carbon
+        Fbg = (1/CAPd13C).*((d13C(tt,irs)-dlcy)*Fwcy+(d13C(tt,irs)-dlca)*Fwca +...
+            (d13C(tt,irs)-dlgy)*Fwgy+(d13C(tt,irs)-dlga)*Fwga + ...
+            (d13C(tt,irs)-dlca)*Fmc +(d13C(tt,irs)-dlga)*Fmg);
+
+        %burial flux of CaSO4 sulfur
+        Fbs = Fwpy+Fwpa+Fwsy+Fwsa+Fms+Fmp-Fbp;
+
+        %burial flux of carbonate carbon
+        Fbc = Fwgy+Fwga+Fwcy+Fwca+Fmc+Fmg-Fbg;
+
+        % ****************  VOLCANIC/NON-VOLC COMPONENTS ******************
+        % This is the "volc" in GEOCARBSULFvolc; see Berner 2006b & 2008
+        % Not sure if I will include a modification for time-varying added
+        % CO2 flux from non-spreading volcanism here or elsewhere.
+
+        % 87Sr/86Sr of seawater as recorded in carbonates
+        Roc = (Sr(tt,irs)./10000)+0.7;
+
+        % 87Sr/86Sr of non-volcanic silicates (same as "Rnv" in Berner 2006b)
+        Rg = Rg_start(irs) - NV(irs).*( 1 - fR(tt,irs).^(1./exp_NV(irs)) );
+
+        % Constants for silicate weathering calc below
+        % note: A this is always a negative number because Roc > Rv
+        A = ((Rv_start(irs)-Roc).*fSR(tt,irs).*Fob(irs))./(Fbc-Fwcy-Fwca);
+        B = Fwcy./(Fbc-Fwcy-Fwca);
+        D = Fwca./(Fbc-Fwcy-Fwca);
+        E = Fbc./(Fbc-Fwcy-Fwca);
+
+        % fraction of total Ca and Mg silicate weathering derived
+        % from volcanic rocks
+        Xvolc = (A + B.*Rcy + D.*Rca - E.*Roc + Rg)./(Rg - Rv_start(irs));
+
+        % volcanic weathering effect at time (t) relative to present-day
+        fvolc = (VNV(irs).*Xvolc + 1 - Xvolc)./(VNV(irs).*Xvolc_0(irs) + ...
+            1 - Xvolc_0(irs));
+
+
+        % **********************  CALCULATE O2  ***************************
+        %                  (atmospheric concentrations) 
+        
+        %calculate oxygen mass for the time-step
+        if (t<tstart) 
+            oxygen = oxygen + (Fbg + (15./8).*Fbp).*Dt - ...
+                     (Fwgy + Fwga + Fmg).*Dt - ...
+                     (15./8).*(Fwpy + Fwpa + Fmp).*Dt;
+
+            if (oxygen<0)
+                %disp(['Here I am! ',' time = ',num2str(t),' and oxygen = ',num2str(oxygen)]);
+            end
+        end
+
+        % expression that summarizes the chemical weathering of silicates at 
+        % time (t) relative to the present-day in the absence of climatic 
+        % effects (other than the effect of CO2 on carbonate weathering); 
+        % it is calculated by dividing total silicate chemical weathering 
+        % at time (t)--as determined by mass balance between burial and 
+        % degassing (numerator)--by the non-climatic processes that affect 
+        % silicate chemical weathering multiplied by the present-day 
+        % chemical weathering flux, Fwsi_0 (denominator) (see equation 5.2 
+        % in Berner 2004) (called "fB" in BASIC scripts)
+        fwsi_no_climate = (Fbc-Fwcy-Fwca)./( ( (fAw_fA(tt,irs).*fA(tt,irs).*...
+                          fD(tt,irs) ).^exp_fD(irs) ).*fE.*fR(tt,irs).*...
+                          fvolc.*Fwsi_0(irs));
+
+
+        %TEST FOR FAILED RUNS (negative numbers, NaN's, or oxygen <5% or >50%)
+        % temporary array for testing if a 0 or negative is present
+        tmp = [B,D,E,fwsi_no_climate,Fwpy,Fwsy,Fwgy,Fwcy,Fwpa,Fwsa,Fwga,...
+                Fwca,Fmp,Fms,Fmg,Fmc,CAPd13C,CAPd34S,Fbp,Fbg,Fbs,Fbc,Spy,...
+                Ssy,Gy,Cy,Ca,Xvolc,fvolc];
+        % temporary array to test for NANs in any of the following
+        % variables
+        tmp2 = fwsi_no_climate+A+B+D+E+Fwpy+Fwsy+Fwgy+Fwcy+Fwpa+...
+                Fwsa+Fwga+Fwca+Fmp+Fms+Fmg+Fmc+CAPd13C+CAPd34S+Fbp+...
+                Fbg+Fbs+Fbc+Spy+Ssy+Gy+Cy+Ca+dlpy+dlpa+dlsy+dlsa+...
+                dlgy+dlga+dlcy+dlca+Rcy+Rca+Xvolc+fvolc+GCM+oxygen; 
+
+        if (~isempty(tmp(tmp<=0)) || isnan(tmp2) || ...
+            100*(oxygen/(oxygen+143))<5 || 100*(oxygen/(oxygen+143))>50)  
+            failed_run = 'TRUE';
+        end
+
+        % **********************  CALCULATE RCO2  *************************
+        %                   (iterative solve for C02)
+        GEOCARBSULF_iterativeCO2solve;
+
+
+        % ************ CALCULATE NEW VALUES FOR NEXT STEP *****************
+        %                 (masses and isotopic values)
+
+        % MASSES
+        %mass of young pyrite sulfur
+        Spy = Spy + (Fbp - Fwpy - Fyop).*Dt;
+
+        %mass of young CaSO4 sulfur
+        Ssy = Ssy + (Fbs - Fwsy - Fyos).*Dt;
+
+        %mass of young crustal organic carbon
+        Gy = Gy + (Fbg - Fwgy - Fyog).*Dt;
+
+        %mass of young crustal carbonate carbon
+        Cy = Cy + (Fbc - Fwcy - Fyoc).*Dt;
+
+        %mass of old crustal carbonate carbon
+        Ca = CT(irs) - Gy - Ga(irs) - Cy - COC(irs);
+
+        % ISOTOPIC VALUES
+        %d34S of young pyrite sulfur
+        dlpy = dlpy + ((d34S(tt,irs) - dlpy - CAPd34S).*Fbp./Spy).*Dt;
+
+        %d34S of old pyrite sulfur
+        dlpa = dlpa + (Fyop.*(dlpy - dlpa)./Spa(irs)).*Dt;
+
+        %d34S value of young CaSO4 sulfur
+        dlsy = dlsy + ((d34S(tt,irs) - dlsy).*Fbs./Ssy).*Dt;
+
+        %d34S value of old CaSO4 sulfur
+        dlsa = dlsa + (Fyos.*(dlsy - dlsa)./Ssa(irs)).*Dt;
+
+        %d13C of young organic matter
+        dlgy = dlgy + ((d13C(tt,irs) - dlgy - CAPd13C).*Fbg./Gy).*Dt;
+
+        %d13C of old organic matter
+        dlga = dlga + (Fyog.*(dlgy - dlga)./Ga(irs)).*Dt;
+
+        %d13C value of young crustal carbonate carbon
+        dlcy = dlcy + ((d13C(tt,irs) - dlcy).*Fbc./Cy).*Dt;
+
+        %d13C value of old crustal carbonate carbon
+        dlca = dlca + (Fyoc*(dlcy - dlca)./Ca).*Dt;
+
+        %87Sr/86Sr of young carbonates undergoing weathering over the time-step
+        Rcy = Rcy + ((Roc - Rcy).*Fbc./Cy).*Dt;
+
+        %87Sr/86Sr of old carbonates undergoing weathering over the time-step
+        Rca = Rca + ((Rcy - Rca).*Fyoc./Ca).*Dt;
 
 
 
+        % ************ FILL OUTPUT VALUES FOR CO2 AND O2 ******************
+        %                 (if failed run, set to NAN)
 
 
+        % O2 output as (%) and CO2 as (ppm)
+        if (strcmp(failed_run,'FALSE'))
+            % RCO2 is multiplied by 250 (Pleistocene mean CO2) to convert to ppm units
+            CO2_resamples(tt,irs) = RCO2*250;  
+
+            % converts O2 mass to O2 (%)
+            O2_resamples(tt,irs) = 100.*(oxygen./(oxygen+143));  
+        else
+            RCO2 = 10; % reset RCO2 seed for next run
+
+            if (strcmp(input_distribution,'TRUE') && strcmp(loop_parameters,'FALSE')) 
+                GEOCARBSULF_setNaN;
+            end
+        end % if..else loop
+
+        %test for estimated oxygen at present-day to be between 19-23%,
+        % and estimated CO2 at present-day to be between 200-300 ppm;
+        % if not, the whole time-series is considered a failed run
+        if (t==0 && (isnan(oxygen+RCO2) || 100*(oxygen/(oxygen+143))<19 || ...
+                100*(oxygen/(oxygen+143))>23 || RCO2<0.8 || RCO2>1.2))
+            CO2_resamples(:,irs) =  NaN;
+            O2_resamples(:,irs) = NaN;
+            failed_run = 'TRUE';
 
 
+            if (strcmp(input_distribution,'TRUE') && strcmp(loop_parameters,'FALSE'))
+                GEOCARBSULF_setNaN;
+            end
 
+        end
 
+    end % time loop
+
+    %printing progress of run (every screen_update_steps runs)
+    zz = irs/screen_update_steps; 
+    if (strcmp(failed_run,'TRUE'))
+        nfail = nfail + 1; 
     end
 
-end
+    if (round(zz) == zz)
+      disp([num2str(irs),' runs of ',num2str(resampleN),' are complete.']);
+      disp([num2str(nfail),' runs out of ',num2str(irs),' completed have failed.'])
+      disp(' ');
+    end
 
+end  % resample loop
+
+
+%% GEOCARBSULF OUTPUT
+
+% Outputs here include the mean and percentiles for O2 and CO2 for each age
+% plus all of the resampled values for the different parameters so that the
+% values used can be tracked. 
+%GEOCARBSULF_out2csvfiles.m 
+
+% If desired, create a couple of plots to show the data
+%GEOCARBSULF_summaryplots.m 
 
 
 
