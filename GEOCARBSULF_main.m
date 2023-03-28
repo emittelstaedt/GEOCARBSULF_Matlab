@@ -69,7 +69,7 @@ clear
 
 % ******************   MONTE CARLO ANALYSIS PARAMETERS   ******************
 % number of resamples; if you wish to bypass resampling, set to 1
-resampleN = 10000;  
+resampleN = 300000;  
 
 % list of percentiles (of any length) used to evaluate a resampled data set
 % the median (0.5) is outputted by default 
@@ -468,6 +468,7 @@ for irs = 1:resampleN
     if (round(zz) == zz)
       disp([num2str(irs),' runs of ',num2str(resampleN),' are complete.']);
       disp([num2str(nfail),' runs out of ',num2str(irs),' completed have failed.'])
+      disp(['Number successful: ',num2str(irs-nfail)])
       disp(' ');
     end
 
@@ -482,7 +483,7 @@ end  % resample loop
 GEOCARBSULF_out2csvfiles; 
 
 % If desired, create a couple of plots to show the data
-%GEOCARBSULF_summaryplots.m 
+GEOCARBSULF_summaryplots; 
 
 %% END OF CODE
 disp('GEOCARBSULF Run Complete!')
