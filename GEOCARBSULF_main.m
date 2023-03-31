@@ -176,11 +176,11 @@ for irs = 1:resampleN
     % was inside the time loop.  However, they tracked failed runs by
     % setting things to NaN, but I do both that and count failed runs
     % throughout execution so I need it to remain once set for each run. 
-    failed_run = 'FALSE';
+    %failed_run = 'FALSE';
 
     % loop over time steps
     for tt = 1:nsteps
-        %failed_run = 'FALSE';
+        failed_run = 'FALSE';
         
         % get current time
         t = time_arrays(tt,"age").age;
@@ -346,12 +346,18 @@ for irs = 1:resampleN
 
         end
 
+        % I found that occasionally the value of oxygen would be negative.
+        % If the value was sufficiently negative than the "failed_run"
+        % checks wouldn't catch it because (oxygen/(oxygen+143)) could end
+        % up being + if oxygen < -143.  So, I am explicitly dissallowing
+        % any run where oxygen become negative and considering the entire
+        % run a failure.  (Note: I did the same in the Royer et al., 2014 R
+        % code and this only changed their results very slightly)
         if (oxygen<0)
-            %disp('oxygen < 0')
-            %failed_run = 'TRUE';
-            %CO2_resamples(:,irs) =  NaN;
-            %O2_resamples(:,irs) = NaN;
-            %break;
+            failed_run = 'TRUE';
+            CO2_resamples(:,irs) =  NaN;
+            O2_resamples(:,irs) = NaN;
+            break;
         end
 
         % expression that summarizes the chemical weathering of silicates at
