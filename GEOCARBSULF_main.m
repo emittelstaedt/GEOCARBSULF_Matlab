@@ -69,7 +69,7 @@ clear
 
 % ******************   MONTE CARLO ANALYSIS PARAMETERS   ******************
 % number of resamples; if you wish to bypass resampling, set to 1
-resampleN = 300000;  
+resampleN = 10000;  
 
 % list of percentiles (of any length) used to evaluate a resampled data set
 % the median (0.5) is outputted by default 
@@ -123,8 +123,6 @@ GEOCARBSULF_loadinputfiles;
 
 
 
-
-
 %% Setup Arrays for Calculations and Data Tracking
 
 % *********** Resample Arrays and Constants for MC error Analysis *********
@@ -132,6 +130,21 @@ GEOCARBSULF_loadinputfiles;
 % if resample set to 'FALSE' in input files that particular parameter will
 % not be resampled
 GEOCARBSULF_performresampling;
+
+% ******************** TESTING TESTING TESTING TESTING ********************
+% Looking at the different resampled ranges
+
+% plot resampled values and compare to Royer
+% Calculate percentile values 
+% if (resampleN>1)
+%     percentiles_test = quantile(Sr, percentile_values, 2);
+% end
+% 
+% figure(3),clf;
+% 
+
+
+% ******************** TESTING TESTING TESTING TESTING ********************
 
 % Initialize Empty calculation arrays for individual calcs of O2 and CO2
 O2_resamples = zeros(nsteps, resampleN);
@@ -142,7 +155,7 @@ age = zeros(nsteps,1);
 
 % track failed runs
 nfail = 0; 
-
+nfail_time = 0;
 
 %% GEOCARBSULF CALCULATIONS (mass balance and chemical reactions)
 
@@ -167,7 +180,8 @@ for irs = 1:resampleN
 
     % loop over time steps
     for tt = 1:nsteps
-
+        %failed_run = 'FALSE';
+        
         % get current time
         t = time_arrays(tt,"age").age;
         % store time
@@ -177,9 +191,9 @@ for irs = 1:resampleN
         % glacial periods 260 - 330 Myrs ago and 35 - 0 Myrs ago;
         % BASIC code calls for a 270-340 Myrs ago interval, but see
         % Fielding et al 2008 (GSA Special Paper 441: 343-354) for justification
-        if ((t<=330 && t>=260) || t< 36)
+        if ((t<=330 && t>=260) || t<= 40)
             % in GEOCARBSULF, deltaT2X = GCM*ln(2); capital gamma in Berner (2004)
-            GCM = GLAC(irs).*deltaT2X(irs)/log(2);
+            GCM = GLAC(irs).*deltaT2X(irs)./log(2);
         else
             GCM = deltaT2X(irs)/log(2);
         end
@@ -196,7 +210,7 @@ for irs = 1:resampleN
             %effect of CO2 on plant-assisted weathering for carbonates at
             % time (t) to the present-day
             fBB = (1+ACTcarb(irs).*GCM.*log(RCO2)-ACTcarb(irs).*Ws(irs).*(t/tstart)+...
-                ACTcarb(irs).*GEOG(tt,irs)).*RCO2.^exp_fnBb(irs);
+                ACTcarb(irs).*GEOG(tt,irs)).*(RCO2.^exp_fnBb(irs));
 
         elseif (t<=380 && t>350)
             %vegetation = ramp-up to gymnosperm domination
@@ -206,11 +220,13 @@ for irs = 1:resampleN
                 ACTcarb(irs).*GEOG(tt,irs)).*(2*RCO2./(1+RCO2)).^FERT(irs))+...
                 ((t-350)/30).*(1 + ACTcarb(irs).*GCM.*log(RCO2)-...
                 ACTcarb(irs).*Ws(irs).*(t/tstart)+...
-                ACTcarb(irs).*GEOG(tt,irs)).*RCO2.^exp_fnBb(irs);
+                ACTcarb(irs).*GEOG(tt,irs)).*(RCO2.^exp_fnBb(irs));
         elseif (t<=350)
             fBB = (1+ACTcarb(irs)*GCM*log(RCO2)-ACTcarb(irs)*Ws(irs)*(t/tstart)+...
-                ACTcarb(irs)*GEOG(tt,irs))*(2*RCO2/(1+RCO2))^FERT(irs);
-        elseif (t<=350 && t>130)
+                ACTcarb(irs)*GEOG(tt,irs))*((2*RCO2/(1+RCO2)).^FERT(irs));
+        end
+
+        if (t<=350 && t>130)
             %vegetation = gymnosperm domination
             fE = GYM(irs);
         elseif (t<=130 && t>80)
@@ -225,6 +241,7 @@ for irs = 1:resampleN
         %                 (weathering and degassing)
         % see pp. 5660-5661 in Berner (2006a) for discussion of "Fwp",
         % "Fws", and "Fwg" fluxes
+        % TO DO: add CO2 flux from non-spreading volcanism to Fmg below
 
         %weathering flux of young pyrite
         Fwpy = fA(tt,irs)*fR(tt,irs)*kwpy(irs)*Spy;
@@ -275,7 +292,7 @@ for irs = 1:resampleN
         CAPd34S = CAPd34S_0(irs).*((oxygen./oxygen_0).^n(irs));
 
         %isotopic fractionation between carbonate and organic matter (see Berner 2006a)
-        CAPd13C = CAPd13C_0(irs)+J(irs).*(oxygen./oxygen_0-1);
+        CAPd13C = CAPd13C_0(irs)+J(irs).*((oxygen./oxygen_0) - 1);
 
         %burial flux of pyrite
         Fbp = (1/CAPd34S)*((d34S(tt,irs)-dlsy)*Fwsy+(d34S(tt,irs)-dlsa)*Fwsa +...
@@ -295,8 +312,6 @@ for irs = 1:resampleN
 
         % ****************  VOLCANIC/NON-VOLC COMPONENTS ******************
         % This is the "volc" in GEOCARBSULFvolc; see Berner 2006b & 2008
-        % Not sure if I will include a modification for time-varying added
-        % CO2 flux from non-spreading volcanism here or elsewhere.
 
         % 87Sr/86Sr of seawater as recorded in carbonates
         Roc = (Sr(tt,irs)./10000)+0.7;
@@ -329,13 +344,18 @@ for irs = 1:resampleN
                      (Fwgy + Fwga + Fmg).*Dt - ...
                      (15./8).*(Fwpy + Fwpa + Fmp).*Dt;
 
-            if (oxygen<0)
-                %disp(['Here I am! ',' time = ',num2str(t),' and oxygen = ',num2str(oxygen)]);
-            end
         end
 
-        % expression that summarizes the chemical weathering of silicates at 
-        % time (t) relative to the present-day in the absence of climatic 
+        if (oxygen<0)
+            %disp('oxygen < 0')
+            %failed_run = 'TRUE';
+            %CO2_resamples(:,irs) =  NaN;
+            %O2_resamples(:,irs) = NaN;
+            %break;
+        end
+
+        % expression that summarizes the chemical weathering of silicates at
+        % time (t) relative to the present-day in the absence of climatic
         % effects (other than the effect of CO2 on carbonate weathering); 
         % it is calculated by dividing total silicate chemical weathering 
         % at time (t)--as determined by mass balance between burial and 
@@ -346,8 +366,7 @@ for irs = 1:resampleN
         fwsi_no_climate = (Fbc-Fwcy-Fwca)./( ( (fAw_fA(tt,irs).*fA(tt,irs).*...
                           fD(tt,irs) ).^exp_fD(irs) ).*fE.*fR(tt,irs).*...
                           fvolc.*Fwsi_0(irs));
-
-
+ 
         %TEST FOR FAILED RUNS (negative numbers, NaN's, or oxygen <5% or >50%)
         % temporary array for testing if a 0 or negative is present
         tmp = [B,D,E,fwsi_no_climate,Fwpy,Fwsy,Fwgy,Fwcy,Fwpa,Fwsa,Fwga,...
@@ -363,6 +382,7 @@ for irs = 1:resampleN
         if (~isempty(tmp(tmp<=0)) || isnan(tmp2) || ...
             100*(oxygen/(oxygen+143))<5 || 100*(oxygen/(oxygen+143))>50)  
             failed_run = 'TRUE';
+
         end
 
         % **********************  CALCULATE RCO2  *************************
@@ -438,6 +458,7 @@ for irs = 1:resampleN
 
             if (strcmp(input_distribution,'TRUE') && strcmp(loop_parameters,'FALSE')) 
                 GEOCARBSULF_setNaN;
+                disp('Line 454!  Shouldnt be here!!')
             end
         end % if..else loop
 
@@ -453,6 +474,7 @@ for irs = 1:resampleN
 
             if (strcmp(input_distribution,'TRUE') && strcmp(loop_parameters,'FALSE'))
                 GEOCARBSULF_setNaN;
+                disp('Line 470!  Shouldnt be here!!')
             end
 
         end
@@ -467,7 +489,7 @@ for irs = 1:resampleN
 
     if (round(zz) == zz)
       disp([num2str(irs),' runs of ',num2str(resampleN),' are complete.']);
-      disp([num2str(nfail),' runs out of ',num2str(irs),' completed have failed.'])
+      disp([num2str(nfail),' runs out of ',num2str(irs),' completed failed somewhere.'])
       disp(['Number successful: ',num2str(irs-nfail)])
       disp(' ');
     end

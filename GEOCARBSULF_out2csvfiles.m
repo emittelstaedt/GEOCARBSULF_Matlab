@@ -99,7 +99,7 @@ if strcmp(loop_parameters,'TRUE')
     % NOT CURRENTLY IMPLEMENTED
 else
     out_table = array2table(GEOCARB_output,'VariableNames',GEOCARB_header);
-    %!!write.csv(GEOCARB_output, "GEOCARB_output.csv")
+    %!!write.csv(GEOCARB_output, "GEOCARB_Matlab_out.csv")
 end
 
 
