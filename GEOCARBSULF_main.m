@@ -69,7 +69,7 @@ clear
 
 % ******************   MONTE CARLO ANALYSIS PARAMETERS   ******************
 % number of resamples; if you wish to bypass resampling, set to 1
-resampleN = 10000;  
+resampleN = 1;  
 
 % list of percentiles (of any length) used to evaluate a resampled data set
 % the median (0.5) is outputted by default 
@@ -87,6 +87,13 @@ input_distribution = 'FALSE';
 % BEWARE: long run times (68X longer than a single resampled run)
 loop_parameters = 'FALSE'; 
 
+% set to "TRUE" to test the effect on calculated CO2 and O2 by varying only
+% a single parameter as defined in vary_param.  This is like
+% loop_parameters, but does not go through all, just does one. Originally
+% added for use in Mittelstaedt et al., 2024
+single_parameter = 'FALSE';
+vary_param = 'fSR';  
+
 % maximum number of times the convergence equation for CO2_570 will iterate 
 % before signaling a failed run; in a test with reasonably-well-constrained 
 % input parameters (similar to simulations presented in Royer et al, 2014), 
@@ -102,10 +109,10 @@ Godderis = 'TRUE';
 % Mass of Present day atmospheric O2 (units???)
 oxygen_0 = 38;
 
-% Time step size (millions of years, Myrs) 
+% Time step size (millions of years, Myrs) - TO CHANGE INPUTS MUST MATCH 
 Dt = 10; 
 
-% start time (Myrs)
+% start time (Myrs) - TO CHANGE INPUTS MUST MATCH
 tstart = 570;
 
 % *****************   SCREEN OUTPUT + PLOTTING CHOICES   ******************
@@ -176,11 +183,11 @@ for irs = 1:resampleN
     % was inside the time loop.  However, they tracked failed runs by
     % setting things to NaN, but I do both that and count failed runs
     % throughout execution so I need it to remain once set for each run. 
-    %failed_run = 'FALSE';
+    failed_run = 'FALSE';
 
     % loop over time steps
     for tt = 1:nsteps
-        failed_run = 'FALSE';
+        %failed_run = 'FALSE';
         
         % get current time
         t = time_arrays(tt,"age").age;
