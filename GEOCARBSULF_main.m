@@ -69,7 +69,7 @@ clear
 
 % ******************   MONTE CARLO ANALYSIS PARAMETERS   ******************
 % number of resamples; if you wish to bypass resampling, set to 1
-resampleN = 1;  
+resampleN = 10000;  
 
 % list of percentiles (of any length) used to evaluate a resampled data set
 % the median (0.5) is outputted by default 
@@ -92,7 +92,7 @@ loop_parameters = 'FALSE';
 % loop_parameters, but does not go through all, just does one. Originally
 % added for use in Mittelstaedt et al., 2024
 single_parameter = 'FALSE';
-vary_param = 'fSR';  
+vary_param = 'GYM';  
 
 % maximum number of times the convergence equation for CO2_570 will iterate 
 % before signaling a failed run; in a test with reasonably-well-constrained 
@@ -198,7 +198,7 @@ for irs = 1:resampleN
         % glacial periods 260 - 330 Myrs ago and 35 - 0 Myrs ago;
         % BASIC code calls for a 270-340 Myrs ago interval, but see
         % Fielding et al 2008 (GSA Special Paper 441: 343-354) for justification
-        if ((t<=330 && t>=260) || t<= 40)
+        if ((t<=330 && t>=260) || t<= 35+Dt)
             % in GEOCARBSULF, deltaT2X = GCM*ln(2); capital gamma in Berner (2004)
             GCM = GLAC(irs).*deltaT2X(irs)./log(2);
         else

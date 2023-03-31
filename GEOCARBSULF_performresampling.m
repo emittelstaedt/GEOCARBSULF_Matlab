@@ -34,7 +34,16 @@
 %       Rates ("k" prefix) are in units of Myrs-1
 %       Stable isotopic compositions ("d" prefix) are in per mil units
 %
-% ***************************  TIME ARRAYS ********************************
+%% Check for changes in settings for resampling
+
+% if vary only one parameter (not looping)
+if (strcmp(single_parameter,'TRUE'))
+    row = find(strcmp(inputs.parameter,vary_param)==1);
+    inputs(:,'resample') = {'FALSE'};
+    %inputs{row,'resample'} = {'TRUE'};
+end
+
+%% **************************  TIME ARRAYS ********************************
 
 % generate random distributions for the time-dependent parameters 
 % alphabetical order 
@@ -113,7 +122,7 @@ fSR = GEOCARBSULF_resampletimearray(time_arrays(:,'fSR'),time_arrays(:,'efSR'),'
 fC = GEOCARBSULF_resampletimearray(time_arrays(:,'fC'),time_arrays(:,'efC'),'fC',inputs,resampleN);
 
 
-% ****************************  CONSTANTS  ********************************
+%% ***************************  CONSTANTS  ********************************
 
 % activation energy (E) for dissolution of Ca- and Mg-silicates on land, 
 % where ACT = E/RTT0 (1/K); called "Z" in Berner (2004)
@@ -230,7 +239,6 @@ CAPd13C_0 = GEOCARBSULF_resampleconstant('CAPd13C_0',inputs,resampleN);
 CAPd34S_0 = GEOCARBSULF_resampleconstant('CAPd34S_0',inputs,resampleN);
 
 %                   values at start time
-
 
 % mass of atmospheric O2 at 570 Myrs ago (ROYER) or specified start time
 oxygen_start = GEOCARBSULF_resampleconstant('oxygen_570',inputs,resampleN);
