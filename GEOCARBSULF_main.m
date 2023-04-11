@@ -69,7 +69,7 @@ clear
 
 % ******************   MONTE CARLO ANALYSIS PARAMETERS   ******************
 % number of resamples; if you wish to bypass resampling, set to 1
-resampleN = 10000;  
+resampleN = 1;  
 
 % list of percentiles (of any length) used to evaluate a resampled data set
 % the median (0.5) is outputted by default 
@@ -109,14 +109,8 @@ Godderis = 'TRUE';
 % Mass of Present day atmospheric O2 (units???)
 oxygen_0 = 38;
 
-% Time step size (millions of years, Myrs) - TO CHANGE INPUTS MUST MATCH 
-Dt = 10; 
-
-% start time (Myrs) - TO CHANGE INPUTS MUST MATCH
-tstart = 570;
 
 % *****************   SCREEN OUTPUT + PLOTTING CHOICES   ******************
-% 
 
 % how often to give a text update to the screen about progress
 screen_update_steps = resampleN./10; 
@@ -127,6 +121,13 @@ screen_update_steps = resampleN./10;
 
 % Load Input Files
 GEOCARBSULF_loadinputfiles;
+
+% set time parameters from inputs
+% Time step size (millions of years, Myrs) - ASSUMED CONSTANT!!!! 
+Dt = time_arrays(1,"age").age - time_arrays(2,"age").age; 
+
+% start time (Myrs)
+tstart = time_arrays(1,"age").age;
 
 
 
