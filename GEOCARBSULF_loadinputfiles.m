@@ -15,8 +15,11 @@
 %% Load Input Files
 
 %reading in the two input files (see ROYER_README.txt and noted papers)
-inputs = readtable("GEOCARB_input_summaries.csv");
-time_arrays = readtable("GEOCARB_input_arrays.csv");
+sum_table = "GEOCARB_input_summaries.csv";
+array_table = "GEOCARB_input_arrays.csv";
+
+inputs = readtable(sum_table);
+time_arrays = readtable(array_table);
 
 % determine number of time steps
 nsteps = height(time_arrays);

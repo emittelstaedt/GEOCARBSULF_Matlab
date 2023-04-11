@@ -104,8 +104,11 @@ end
 
 %% Save Data into New Table
 
+GCSoutTable = array2table(OutputArray,'VariableNames',GCSnames);
 
-
+array_out = cast(array_table,'char');
+fname = [array_out(1:end-4),'_tMod.csv'];
+writetable(GCSoutTable,fname);
 
 
 %% TESTING
