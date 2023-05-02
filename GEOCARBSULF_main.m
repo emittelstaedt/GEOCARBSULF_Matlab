@@ -54,6 +54,7 @@
 %       c=carbonate;        si=silicates; 
 %       g=organic matter;   b=burial; 
 %       m=degassing;        w=weathering
+%       v=volcanism (hotspot)
 %
 %   UNITS
 %       Masses are in units of 10^18 mol
@@ -287,9 +288,13 @@ for irs = 1:resampleN
         %carbon degassing flux from volcanism, metamorphism, and diagenesis of carbonate
         Fmc = fSR(tt,irs)*fC(tt,irs)*Fmc_0(irs);
 
+        %carbon degassing flux from hotspot volcanism through time
+        % added May, 2023 by E. Mittelstaedt
+        %Fmv = fHR(tt,irs); 
+
         Fyop = Fwpa+Fmp;  %degassing + weathering flux of pyrite
         Fyos = Fwsa+Fms;  %degassing + weathering flux of CaSO4 sulfur
-        Fyog = Fwga+Fmg;  %degassing + weathering flux of organic carbon
+        Fyog = Fwga+Fmg';% + Fmv;  %degassing + weathering flux of organic carbon
         Fyoc = Fwca+Fmc;  %degassing + weathering flux of carbonate carbon
 
 
