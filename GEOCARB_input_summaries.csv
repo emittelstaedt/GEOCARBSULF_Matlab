@@ -15,6 +15,8 @@ GEOG_Godderis,time array,TRUE,gaussian,,,#NAME?,inf,K,Berner (2004); Otto-Bleisn
 GEOG,time array,TRUE,gaussian,,,#NAME?,inf,K,Berner (2004); Otto-Bleisner (1995); Godderis et al (2012),Change in land mean surface temperature that is undergoing chemical weathering  at time (t) relative to the present-day in the absence of changes in solar luminosity and CO2 (see p. 35 in Berner 2004)
 fSR,time array,TRUE,gaussian,,,0,inf,dimensionless,Berner (2004),Seafloor creation rate at time (t) relative to the present-day
 fC,time array,TRUE,gaussian,,,0,inf,dimensionless,Berner (2004),"Effect of carbonate content of subducting oceanic crust on CO2 degassing rate at time (t) relative to the present-day; 0.75 for >150 Ma, then ramps up linearly to 1 at present-day"
+fHR,time array,TRUE,gaussian,,,0,inf,10^18 mol/m.y.,"Mittelstaedt et al., 2023",Estimated CO2 degassing from erupted material making up hotspot volcanoes
+fHRall,time array,TRUE,gaussian,,,0,inf,10^18 mol/m.y.,"Mittelstaedt et al., 2023","Estimated CO2 degassing from hotspot volcanoes + underplated material see Morrow and Mittelstaedt, 2021 for source of data"
 ACT,constant,TRUE,gaussian,0.09,0.045,0,inf,1/K,Berner (2004),"Activation energy for dissolution of Ca- and Mg-silicates on land. 0.03 is equivalent to 20 kJ/mol, 0.08 to 55 kJ/mol, and 0.13 to 90 kJ/mol (ACT = DE/RTTo; see p. 28 in Berner 2004)."
 ACTcarb,constant,TRUE,gaussian,0.087,0.0435,0,inf,1/K,Berner (2004),Activation energy for dissolution of carbonates on land
 VNV,constant,TRUE,gaussian,5,2.5,0,inf,dimensionless,"Berner (2006b, 2008)",Rate of chemical weathering in volcanic silicate rocks relative to non-volcanic silicate rocks

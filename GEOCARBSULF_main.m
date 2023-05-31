@@ -110,6 +110,14 @@ Godderis = 'TRUE';
 % Mass of Present day atmospheric O2 (units???)
 oxygen_0 = 38;
 
+% set to 'TRUE' if want to include estimates of CO2 degassing from hotspot
+% volcanic chains since 80Ma.  Used in Mittelstaedt et al., 2023. The data
+% can include either just erupted products (edifice+flexure) fHR or
+% additionally include estimates of underplated material fHRall.  Currently 
+% uncertainty estimates are set to 25% of the value at that time. 
+% added: May, 2023 by E. Mittelstaedt 
+HSdegassing = 'TRUE';
+
 
 % *****************   SCREEN OUTPUT + PLOTTING CHOICES   ******************
 
@@ -290,13 +298,14 @@ for irs = 1:resampleN
 
         %carbon degassing flux from hotspot volcanism through time
         % added May, 2023 by E. Mittelstaedt
-        %Fmv = fHR(tt,irs); 
+        Fmv = fHR(tt,irs); 
 
         Fyop = Fwpa+Fmp;  %degassing + weathering flux of pyrite
         Fyos = Fwsa+Fms;  %degassing + weathering flux of CaSO4 sulfur
-        Fyog = Fwga+Fmg';% + Fmv;  %degassing + weathering flux of organic carbon
-        Fyoc = Fwca+Fmc;  %degassing + weathering flux of carbonate carbon
+        Fyog = Fwga+Fmg';  %degassing + weathering flux of organic carbon
+        Fyoc = Fwca+Fmc + Fmv;  %degassing + weathering flux of carbonate carbon
 
+        %disp(['Ridge degassing: ',num2str(Fmg),', compare to HS: ',num2str(Fmv)])
 
         % *****************  CALCULATE SINK FLUXES ************************
         %                          (burial)
@@ -333,7 +342,7 @@ for irs = 1:resampleN
         Rg = Rg_start(irs) - NV(irs).*( 1 - fR(tt,irs).^(1./exp_NV(irs)) );
 
         % Constants for silicate weathering calc below
-        % note: A this is always a negative number because Roc > Rv
+        % note: A is always a negative number because Roc > Rv
         A = ((Rv_start(irs)-Roc).*fSR(tt,irs).*Fob(irs))./(Fbc-Fwcy-Fwca);
         B = Fwcy./(Fbc-Fwcy-Fwca);
         D = Fwca./(Fbc-Fwcy-Fwca);

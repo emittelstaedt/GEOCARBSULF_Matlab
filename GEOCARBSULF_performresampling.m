@@ -121,6 +121,20 @@ fSR = GEOCARBSULF_resampletimearray(time_arrays(:,'fSR'),time_arrays(:,'efSR'),'
 % rate at time (t) relative to the present-day
 fC = GEOCARBSULF_resampletimearray(time_arrays(:,'fC'),time_arrays(:,'efC'),'fC',inputs,resampleN);
 
+% below added May, 2022; E. Mittelstaedt
+if strcmp(HSdegassing,'TRUE')
+    % erupted product degassing from hotspots
+    fHR = GEOCARBSULF_resampletimearray(time_arrays(:,'fHR'),time_arrays(:,'efHR'),'fHR',inputs,resampleN);
+
+    % erupted + underplating degassing from hotspots (assumes deep
+    % degassing to surface)
+    fHRall = GEOCARBSULF_resampletimearray(time_arrays(:,'fHRall'),...
+                        time_arrays(:,'efHRall'),'fHRall',inputs,resampleN);
+
+end
+
+
+
 
 %% ***************************  CONSTANTS  ********************************
 

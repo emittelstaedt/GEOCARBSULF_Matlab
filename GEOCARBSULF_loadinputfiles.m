@@ -16,7 +16,7 @@
 
 %reading in the two input files (see ROYER_README.txt and noted papers)
 sum_table = "GEOCARB_input_summaries.csv";
-array_table = "GEOCARB_input_arrays.csv";
+array_table = "GEOCARB_input_arrays_tMod.csv";
 
 inputs = readtable(sum_table);
 time_arrays = readtable(array_table);

@@ -6,7 +6,18 @@
 %   will mean that the assumption of steady state for each timestep will be
 %   worse for sulphur, but we are interested in CO2.  As long as we are
 %   looking at several million years, the hope is that steady state will
-%   still be a valid assumption. 
+%   still be a valid assumption. In process is a literature search to
+%   justify a shorter timestep for CO2 alone. 
+%
+%   Also an option of this script is to add in the hotspot magma degassing
+%   flux as calculated for Mittelstaedt et al., 2023.  THis covers only the
+%   last 80 Myr (limited by hotspot chain lengths/ages) and much of the
+%   data comes from Morrow and Mittelstaedt, 2021.  However, several other
+%   estimates are also added for Iceland, the Columbia River Basalts, and
+%   the Ethiopian (Afar) flood basalts (see CarbonInPlumes_AddNonMM21Data.m 
+%   for references and data sources. If this data is desired, it will be 
+%   decimated to the desired timestep for GEOCARBSULF (<250kyr not 
+%   not recommended since hotspot data sampled at 50kyr). 
 %
 % *******************    INPUT FILE DESCRIPTIONS    ***********************
 %   The input files used in the R code are unchanged and are described by 
@@ -51,7 +62,7 @@ clear
 
 % Choose Desired Time Range and Timestep (units: Millions of Years)
 tstart_desired = 570;
-Dt_desired = 2.5; 
+Dt_desired = 1; 
 
 
 %% Load Input Files
@@ -63,6 +74,11 @@ loop_parameters = 'FALSE';
 % Load Input Files
 GEOCARBSULF_loadinputfiles;
 
+% Hotspot data switches 
+add_hs_only = 0; %no interp, only hs data add
+add_HSdegas = 'yes';  % add in hotspot degassing as an array 'yes', 'no'
+hsdegas_table = 'GEOCARB_input_hsdegas.csv';
+
 %% Grab current values from existing time-arrays
 
 % set time parameters from inputs
@@ -73,8 +89,17 @@ Dt = time_arrays(1,"age").age - time_arrays(2,"age").age;
 tstart = time_arrays(1,"age").age;
 
 % check if need to do anything 
-if ( (Dt == Dt_desired) && (tstart == tstart_desired))
-    error('No need to interpolate! Input files match desired timestep and time period.');
+if ( (Dt == Dt_desired) && (tstart == tstart_desired))    
+    if (width(time_arrays) == 33) 
+        if strcmp(add_HSdegas,'yes')
+            disp('Hotspot degassing fluxes not added.  Adding fluxes.')
+            add_hs_only = 1;
+        else
+            error('Input files match desired times. No hotspot data.');
+        end
+    else
+       error('Input files match desired times and already contain hotspot degassing data.');
+    end
 end
 
 %% Arrange data and Interpolate
@@ -98,6 +123,29 @@ OutputArray(:,1) = tnew(:);
 % interpolate to new times 
 for jj = 2:width(time_arrays)
      OutputArray(:,jj) = interp1(told(:),GCSinputs(:,jj),tnew,'linear');
+
+end
+
+%% Add in Hotspot Degassing Data 
+
+if strcmp(add_HSdegas,'yes')
+    dt_gcs = Dt_desired;
+    inputs = readtable(hsdegas_table);
+
+    % extract data from table format to an array
+    HSinputs = table2array(inputs);
+    HSnames = inputs.Properties.VariableNames;
+
+    % set up array space (volc only past 80Ma, but GEOCARBSULF data starts
+    % at 570 Ma
+    OutputArray(:,jj+1:jj+4) = zeros(length(tnew),4);
+
+    % put hotspot degassing data into the output array for saving to
+    % GEOCARBSULF csv file
+    OutputArray(end-(height(inputs)-1):end,jj+1:jj+4) = HSinputs;
+
+    % concat names to GCS names cell array
+    GCSnames = [GCSnames,HSnames];
 
 end
 
